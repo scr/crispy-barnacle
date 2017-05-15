@@ -1,3 +1,5 @@
+version '1.0.0'
+
 buildscript {      // Configuration for building
   repositories {
     jcenter()      // Bintray's repository - a fast Maven Central mirror & more
@@ -5,6 +7,7 @@ buildscript {      // Configuration for building
   }
   dependencies {
     classpath 'org.akhikhl.gretty:gretty:+'
+    classpath 'net.idlestate:gradle-download-dependencies-plugin:1.+'
   }
 }
 
@@ -13,9 +16,15 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'org.akhikhl.gretty'
 
+configurations {
+  jettyrunner
+}
+
 dependencies {
   providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+  jettyrunner 'org.eclipse.jetty:jetty-runner:9.4.5.v20170502'
 }
+
 
 // [START gretty]
 gretty {
@@ -23,3 +32,23 @@ gretty {
     contextPath = '/'
     servletContainer = 'jetty9'  // What App Engine Flexible uses
 }
+
+task downloadJettyRunner(type: Copy) {
+  from configurations.jettyrunner
+  into "$buildDir/jetty-runner"
+}
+
+task printJarName {
+  doLast {
+    println war.archiveName
+  }
+}
+
+task printVersion {
+  doLast {
+    println project.version
+  }
+}
+
+build.dependsOn downloadJettyRunner
+
